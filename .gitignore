@@ -17,3 +17,5 @@ dataset.npy
 my_softprompt*.mtjsp
 my_softprompt.zip
 my_softprompt.json
+venv
+cache
