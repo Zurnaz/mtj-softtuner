@@ -543,23 +543,21 @@ def get_hf_conversion_callback(network, model_spec):
                     if "no_transpose" not in transforms and tensor.ndim == 2:
                         tensor = tensor.T
                     tensor.unsqueeze_(0)
+                    reshard_reverse(
+                        tensor,
+                        network.config["cores_per_replica"],
+                        network.state["params"][spec["module"]][
+                            spec["param"]
+                        ].shape,
+                    )
+                    tensor = jnp.array(tensor.detach())
                     if tensor.dtype is torch.float16 or tensor.dtype is torch.float32:
                         tensor = tensor.bfloat16()
 
                     network.state["params"][spec["module"]][
                         spec["param"]
                     ] = network.move_xmap(
-                        jax_from_dlpack(
-                            torch.utils.dlpack.to_dlpack(
-                                reshard_reverse(
-                                    tensor,
-                                    network.config["cores_per_replica"],
-                                    network.state["params"][spec["module"]][
-                                        spec["param"]
-                                    ].shape,
-                                )
-                            )
-                        ),
+                        tensor,
                         np.empty(network.config["cores_per_replica"]),
                     )
 
