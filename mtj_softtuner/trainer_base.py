@@ -3,7 +3,7 @@ from . import core
 from . import exceptions
 from . import serialization
 from . import visualization
-from .kobold import torch_lazy_loader
+from .kobold.modeling import lazy_loader
 
 import abc
 import os
@@ -516,7 +516,7 @@ class TrainerBase(abc.ABC):
                     ),
                     dtype=jnp.float32,
                 )
-                with torch_lazy_loader.use_lazy_torch_load(
+                with lazy_loader.use_lazy_torch_load(
                     callback=core.get_hf_conversion_callback(
                         network, self.data.model_spec
                     ),
