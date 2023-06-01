@@ -24,13 +24,13 @@ patched = False
 old_getnorm = mesh_transformer.layers.getnorm
 
 
-def getnorm(norm_type: str):
+def getnorm(norm_type: str, eps: float):
     if norm_type == "layernorm":
         return hk.LayerNorm(-1, True, True, name="replicated_layer_norm")
     elif norm_type == "layernorm-nobias":
         return hk.LayerNorm(-1, True, False, name="replicated_layer_norm")
     else:
-        return old_getnorm(norm_type)
+        return old_getnorm(norm_type, eps=eps)
 
 
 mesh_transformer.layers.getnorm = getnorm
