@@ -89,7 +89,7 @@ class _ShatterFunction:
 __F = TypeVar("__F", bound=Callable)
 
 
-def shatter(in_axes: str, out_axes: str):
+def shatter(in_axes: str, out_axes: str, prefix=False):
     """
     Helper function for setting up JAX xmaps.
 
@@ -130,7 +130,7 @@ def shatter(in_axes: str, out_axes: str):
         xmapped) and returns the xmapped version of your function.
     """
     in_axes = tuple(map(lambda c: ["batch" if c == "b" else "shard", ...], in_axes))
-    out_axes = tuple(map(lambda c: ["batch" if c == "b" else "shard", ...], out_axes))
+    out_axes = tuple(map(lambda c: ["shard", "batch" if c == "b" else "shard", ...] if prefix else ["batch" if c == "b" else "shard", ...], out_axes))
     if len(in_axes) == 1:
         in_axes = in_axes[0]
     if len(out_axes) == 1:
@@ -237,7 +237,7 @@ class EmbeddingCausalTransformer(
     def __init__(self, config, **kwargs):
         super().__init__(config, **kwargs)
 
-        @shatter("sb", "b")
+        @shatter("sb", "b", True)
         def _get_embedding_matrix(
             params: dict, tokens: jnp.DeviceArray
         ) -> jnp.DeviceArray:
